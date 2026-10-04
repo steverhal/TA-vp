@@ -68,6 +68,11 @@ app.get('/tlu', (req, res) => {
     res.render('miksTLU');
 });
 
+// Minust
+app.get('/minust', (req, res) => {
+    res.render('minust');
+});
+
 // Külastuse registreerimine
 app.get('/regvisit', (req, res) => {
     res.render('regvisit');
@@ -75,11 +80,42 @@ app.get('/regvisit', (req, res) => {
 
 app.post('/regvisit', async (req, res) => {
     try {
-        await fs.appendFile(regTextRef, req.body.nameInput + ';');
+        const dateNow = dateET.fullDate(0);
+        const timeNow = dateET.fullTime();
+
+        await fs.appendFile(
+            regTextRef,
+            req.body.nameInput + ',' + dateNow + ',' + timeNow + ';'
+        );
+
         res.render('regvisit');
     } catch (err) {
         console.log(err);
         res.render('regvisit');
+    }
+});
+
+// Viimane külastus
+app.get('/viimane', async (req, res) => {
+    try {
+        const data = await fs.readFile(regTextRef, 'utf8');
+        const visits = data.split(';');
+
+        const lastVisit = visits[visits.length - 2];
+        const visitData = lastVisit.split(',');
+
+        res.render('viimane', {
+            name: visitData[0],
+            date: visitData[1],
+            time: visitData[2]
+        });
+    } catch (err) {
+        console.log(err);
+        res.render('viimane', {
+            name: '',
+            date: '',
+            time: ''
+        });
     }
 });
 
