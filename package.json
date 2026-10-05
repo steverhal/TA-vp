@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://andrusrinde@github.com/veebiprogrammeerimine-IF26/TA-vp.git"
+    "url": "git+https://github.com/steverhal/TA-vp.git"
   },
   "keywords": [
     "Node.Js",
@@ -19,14 +19,16 @@
     "üliõpilanbe",
     "koolitöö"
   ],
-  "author": "Andrus Rinde",
+  "author": "Stever Hallika",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/veebiprogrammeerimine-IF26/TA-vp/issues"
   },
   "homepage": "https://github.com/veebiprogrammeerimine-IF26/TA-vp#readme",
   "dependencies": {
+    "dotenv": "^18.0.5",
     "ejs": "^6.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mysql2": "^3.24.5"
   }
 }
