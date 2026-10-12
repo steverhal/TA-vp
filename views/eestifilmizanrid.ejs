@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="utf-8">
+    <title>Filmide žanrid</title>
+</head>
+<body>
+    <img src="../pic/veebiprogrammeerimine_2026_TA.png" alt="Veebiprogrammeerimine">
+    <h1>Filmide žanrid</h1>
+    <hr>
+    <p>Siin lehel on näha andmebaasi lisatud žanrid.</p>
+    <hr>
+    <ul>
+        <li><a href="/">Tagasi avalehele</a></li>
+        <li><a href="/eestifilm/zanrid_add">Lisa žanr</a></li>
+        <li><a href="/eestifilm">Eesti filmi avaleht</a></li>
+        <li><a href="/eestifilm/filmid">Vaata filme</a></li>
+    </ul>
+    <hr>
+    <ol>
+        <% genreList.forEach(function(genre){ %>
+        <li>
+            <%= genre.name %>
+            <% if(genre.description) { %>
+                — <%= genre.description %>
+            <% } %>
+        </li>
+        <% }); %>
+    </ol>
+</body>
+</html>

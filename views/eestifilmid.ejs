@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="utf-8">
+    <title>Eesti filmid</title>
+</head>
+<body>
+    <img src="../pic/veebiprogrammeerimine_2026_TA.png" alt="Veebiprogrammeerimine">
+    <h1>Eesti filmid</h1>
+    <hr>
+    <p>Siin lehel on näha andmebaasi lisatud Eesti filmid.</p>
+    <hr>
+    <ul>
+        <li><a href="/">Tagasi avalehele</a></li>
+        <li><a href="/eestifilm/filmid_add">Lisa film</a></li>
+        <li><a href="/eestifilm">Eesti filmi avaleht</a></li>
+		<li><a href="/eestifilm/inimesed">Vaata Eesti filmidega seotud inimesi.</a></li>
+        <li><a href="/eestifilm/zanrid">Vaata žanreid</a></li>
+    </ul>
+    <hr>
+    <ol>
+        <% movieList.forEach(function(movie){ %>
+        <li>
+            <%= movie.title %>,
+            <%= movie.release_year %>,
+            kestus <%= movie.duration_minutes %> minutit
+            <% if(movie.description) { %>
+                — <%= movie.description %>
+            <% } %>
+        </li>
+        <% }); %>
+    </ol>
+</body>
+</html>
