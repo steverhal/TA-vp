@@ -351,6 +351,130 @@ const zanridAddPost = async (req, res) => {
     }
 };
 
+const seosedAdd = async (req, res) => {
+    let conn;
+    try {
+        conn = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+        });
+
+        const [personList] = await conn.execute(
+            "SELECT id, first_name, last_name FROM person ORDER BY last_name"
+        );
+        const [movieList] = await conn.execute(
+            "SELECT id, title FROM movie ORDER BY title"
+        );
+        const [professionList] = await conn.execute(
+            "SELECT id, title FROM profession ORDER BY title"
+        );
+
+        res.render("eestifilmseosed_add", {
+            personList,
+            movieList,
+            professionList,
+            notice: req.query.notice || "Ootan sisestust!",
+            personId: null,
+            movieId: null,
+            professionId: null,
+            characterName: null
+        });
+    } catch (err) {
+        console.log("Viga seoste lisamise lehe avamisel: " + err);
+        res.status(500).send("Andmebaasist andmete lugemine ebaõnnestus.");
+    } finally {
+        if (conn) await conn.end();
+    }
+};
+
+const seosedAddPost = async (req, res) => {
+    let conn;
+    const personId = req.body.personId;
+    const movieId = req.body.movieId;
+    const professionId = req.body.professionId;
+    const characterName = req.body.characterName?.trim() || null;
+
+    try {
+        conn = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+        });
+
+        const [profession] = await conn.execute(
+            "SELECT title FROM profession WHERE id = ?",
+            [professionId]
+        );
+
+        if (!personId || !movieId || !professionId || profession.length === 0) {
+            return res.status(400).send("Vali inimene, film ja amet.");
+        }
+
+        if (profession[0].title === "näitleja" && !characterName) {
+            return res.status(400).send("Näitleja puhul sisesta ka tegelaskuju nimi.");
+        }
+
+        const [existing] = await conn.execute(
+            `SELECT id FROM person_in_movie
+             WHERE person_id = ? AND movie_id = ? AND profession_id = ?
+             AND character_name <=> ?`,
+            [personId, movieId, professionId,
+                profession[0].title === "näitleja" ? characterName : null]
+        );
+
+        if (existing.length > 0) {
+            return res.redirect("/eestifilm/seosed_add?notice=duplicate");
+        }
+
+        await conn.execute(
+            `INSERT INTO person_in_movie
+             (person_id, movie_id, profession_id, character_name)
+             VALUES (?, ?, ?, ?)`,
+            [personId, movieId, professionId,
+                profession[0].title === "näitleja" ? characterName : null]
+        );
+
+        res.redirect("/eestifilm/seosed_add?notice=saved");
+    } catch (err) {
+        console.log("Viga seose salvestamisel: " + err);
+        res.status(500).send("Seose salvestamine ebaõnnestus.");
+    } finally {
+        if (conn) await conn.end();
+    }
+};
+
+const seosed = async (req, res) => {
+    let conn;
+    try {
+        conn = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+        });
+
+        const [seosedList] = await conn.execute(
+            `SELECT person.first_name, person.last_name, movie.title AS movie_title,
+                    profession.title AS profession_title, person_in_movie.character_name
+             FROM person_in_movie
+             JOIN person ON person_in_movie.person_id = person.id
+             JOIN movie ON person_in_movie.movie_id = movie.id
+             JOIN profession ON person_in_movie.profession_id = profession.id
+             ORDER BY movie.title, person.last_name`
+        );
+
+        res.render("eestifilmseosed", {seosedList});
+    } catch (err) {
+        console.log("Viga seoste lugemisel: " + err);
+        res.render("eestifilmseosed", {seosedList: []});
+    } finally {
+        if (conn) await conn.end();
+    }
+};
+
 module.exports = {
 	eestifilm,
 	inimesed,
@@ -361,5 +485,8 @@ module.exports = {
 	filmidAddPost,
 	zanrid,
 	zanridAdd,
-	zanridAddPost
+	zanridAddPost,
+    seosedAdd,
+    seosedAddPost,
+    seosed
 }	

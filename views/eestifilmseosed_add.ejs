@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="utf-8">
+    <title>Filmiseoste lisamine</title>
+</head>
+<body>
+    <img src="../pic/veebiprogrammeerimine_2026_TA.png" alt="Veebiprogrammeerimine">
+    <h1>Filmiseoste lisamine</h1>
+    <hr>
+    <ul>
+        <li><a href="/eestifilm">Eesti filmi avaleht</a></li>
+        <li><a href="/eestifilm/seosed">Vaata seoseid</a></li>
+    </ul>
+    <hr>
+    <form method="POST">
+        <label for="personId">Inimene</label>
+        <select id="personId" name="personId" required>
+            <option selected disabled value="">Vali inimene</option>
+            <% personList.forEach(function(person) { %>
+                <option value="<%= person.id %>">
+                    <%= person.first_name %> <%= person.last_name %>
+                </option>
+            <% }); %>
+        </select>
+        <br>
+
+        <label for="movieId">Film</label>
+        <select id="movieId" name="movieId" required>
+            <option selected disabled value="">Vali film</option>
+            <% movieList.forEach(function(movie) { %>
+                <option value="<%= movie.id %>"><%= movie.title %></option>
+            <% }); %>
+        </select>
+        <br>
+
+        <label for="professionId">Amet</label>
+        <select id="professionId" name="professionId" required>
+            <option selected disabled value="">Vali amet</option>
+            <% professionList.forEach(function(profession) { %>
+                <option value="<%= profession.id %>"><%= profession.title %></option>
+            <% }); %>
+        </select>
+        <br>
+
+        <label for="characterName">Tegelaskuju nimi (näitlejale)</label>
+        <input id="characterName" name="characterName" type="text" maxlength="100">
+        <br>
+
+        <input type="submit" value="Salvesta seos">
+    </form>
+
+    <% if (notice === "duplicate") { %>
+        <p>Selline seos on juba olemas!</p>
+    <% } else if (notice === "saved") { %>
+        <p>Seos salvestati!</p>
+    <% } else { %>
+        <p><%= notice %></p>
+    <% } %>
+</body>
+</html>
