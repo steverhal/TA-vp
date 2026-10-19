@@ -17,7 +17,7 @@ const app = express();
 app.set('view engine', 'ejs');
 //määran ühe päris kataloogi virtuaalses serveris kättesaadavaks
 app.use(express.static('public'));
-app.use(bodyparser.urlencoded({extended: false}));
+app.use(bodyparser.urlencoded({extended: true}));//kui vormidest ainult tekst, siis "false"
 
 // marsruudid
 app.get('/', (req, res) => {
@@ -87,6 +87,10 @@ app.use("/regvisit", regvisitRouter);
 //Eesti filmi marsruudid
 const eestifilmRouter = require("./routes/eestifilmRoutes");
 app.use("/eestifilm", eestifilmRouter);
+
+//galeriipiltide üleslaadimine
+const galleryPhotoUploadRouter = require("./routes/galleryPhotoUploadRoutes");
+app.use("/galleryPhotoUpload", galleryPhotoUploadRouter);
 
 // Tundmatu marsruut
 app.use((req, res) => {
