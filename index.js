@@ -20,16 +20,42 @@ app.use(express.static('public'));
 app.use(bodyparser.urlencoded({extended: true}));//kui vormidest ainult tekst, siis "false"
 
 // marsruudid
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     //res.send("Express.js läks kaima ja serveerib meile veebi.");
     const dayNow = dateET.day();
     const dateNow = dateET.fullDate(0);
     const timeNow = dateET.fullTime();
 
+    let conn;
+    let latestPhoto = null;
+
+    try {
+        conn = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME
+        });
+
+        const sqlReq = "SELECT filename, alttext FROM galleryphotos WHERE id=(SELECT MAX(id) FROM galleryphotos WHERE privacy=? AND deleted IS NULL)";
+        const [photos] = await conn.execute(sqlReq, [3]);
+
+        latestPhoto = photos[0] || null;
+    }
+    catch (err) {
+        console.log("Viga avalehe foto laadimisel: " + err);
+    }
+    finally {
+        if (conn) {
+            await conn.end();
+        }
+    }
+
     res.render('index', {
         dayNow: dayNow,
         dateNow: dateNow,
-        timeNow: timeNow
+        timeNow: timeNow,
+        latestPhoto: latestPhoto
     });
 });
 
@@ -91,6 +117,10 @@ app.use("/eestifilm", eestifilmRouter);
 //galeriipiltide üleslaadimine
 const galleryPhotoUploadRouter = require("./routes/galleryPhotoUploadRoutes");
 app.use("/galleryPhotoUpload", galleryPhotoUploadRouter);
+
+//fotogalerii
+const galleryRouter = require("./routes/galleryRoutes");
+app.use("/gallery", galleryRouter);
 
 // Tundmatu marsruut
 app.use((req, res) => {

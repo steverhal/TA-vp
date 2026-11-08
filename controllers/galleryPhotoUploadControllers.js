@@ -22,10 +22,26 @@ const galleryPhotoUploadPost = async (req, res) => {
 		//genereerime oma failinime
 		const fileName = "vp_" + Date.now() + ".jpg";
 		await fs.rename(req.file.path, req.file.destination + fileName);
-		//pildi suuruse muutmine (max 800 X 600)
-		await sharp(req.file.destination + fileName).resize(800, 600).jpeg({quality: 90}).toFile("./public/gallery/normal/" + fileName);
+
+		//vesimärgi suuruse muutmine
+		const watermark = await sharp("./public/pic/vp_logo_small.png")
+			.resize({width: 100})
+			.png()
+			.toBuffer();
+
+		//pildi suuruse muutmine (max 800 X 600) ja vesimärgi lisamine
+		await sharp(req.file.destination + fileName)
+			.resize(800, 600)
+			.composite([{
+				input: watermark,
+				gravity: "southeast"
+			}])
+			.jpeg({quality: 90})
+			.toFile(process.env.UPLOAD_RESIZED_PATH + fileName);
+
 		//teeme pisipildi (100 X 100)
-		await sharp(req.file.destination + fileName).resize(100, 100).jpeg({quality: 90}).toFile("./public/gallery/thumbs/" + fileName);
+		await sharp(req.file.destination + fileName).resize(100, 100).jpeg({quality: 90}).toFile(process.env.UPLOAD_THUMBNAIL_PATH + fileName);
+
 		let sqlReq = 'INSERT into galleryphotos (filename, origname, alttext, privacy, userid) VALUES (?,?,?,?,?)';
 		const userId = 1;//see on ajutine, kuni päris kasutajakontod teeme
 		// loon andmebaasiühenduse
