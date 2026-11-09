@@ -59,6 +59,16 @@ app.get('/', async (req, res) => {
     });
 });
 
+//sisseloginud kasutajate avaleht
+app.get('/home', (req, res) => {
+	res.render("home");
+});
+
+//väljalogimine
+app.get('/logout', (req, res) => {
+	res.redirect("/");
+});
+
 // Vanasõna
 app.get('/vanasonad', async (req, res) => {
     try {
@@ -121,6 +131,14 @@ app.use("/galleryPhotoUpload", galleryPhotoUploadRouter);
 //fotogalerii
 const galleryRouter = require("./routes/galleryRoutes");
 app.use("/gallery", galleryRouter);
+
+//kasutajakonto loomise marsruut
+const signupRouter = require('./routes/signupRoutes');
+app.use('/signup', signupRouter);
+
+//sisselogimise marsruut
+const signinRouter = require('./routes/signinRoutes');
+app.use('/signin', signinRouter);
 
 // Tundmatu marsruut
 app.use((req, res) => {
