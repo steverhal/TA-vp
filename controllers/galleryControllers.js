@@ -2,10 +2,11 @@ const mysql = require("mysql2/promise");
 
 //@desc fotogalerii leht
 //@route GET /gallery
-//@access public
+//@access private
 
 const gallery = async (req, res) => {
     let conn;
+
     try {
         conn = await mysql.createConnection({
             host: process.env.DB_HOST,
@@ -14,16 +15,25 @@ const gallery = async (req, res) => {
             database: process.env.DB_NAME
         });
 
-        const sqlReq = "SELECT filename, alttext FROM galleryphotos WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC";
+        const sqlReq = "SELECT id, filename, alttext FROM galleryphotos WHERE privacy >= ? AND deleted IS NULL ORDER BY id DESC";
         const [photos] = await conn.execute(sqlReq, [2]);
 
-        res.render("gallery", {photos: photos});
-    }
-    catch (err) {
+        // Loome galerii andmete massiivi
+        let galleryData = [];
+
+        for (let i = 0; i < photos.length; i++) {
+            let altText = photos[i].alttext || "Galerii foto";
+            galleryData.push({src: photos[i].filename, alt: altText, id: photos[i].id});
+        }
+
+        // Edastame andmed gallery.ejs failile
+        res.render("gallery", {photos: photos, galleryData: galleryData});
+
+    } catch (err) {
         console.log("Viga galerii laadimisel: " + err);
         res.status(500).send("Viga galerii laadimisel");
-    }
-    finally {
+
+    } finally {
         if (conn) {
             await conn.end();
         }

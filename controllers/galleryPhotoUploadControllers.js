@@ -4,7 +4,7 @@ const sharp = require ("sharp");
 
 //@desc home page for uploading gallery photos
 //@route GET /galleryPhotoUpload
-//@access public
+//@access private
 
 const galleryPhotoUpload = (req, res) => {
 	res.render("galleryPhotoUpload");
@@ -12,7 +12,7 @@ const galleryPhotoUpload = (req, res) => {
 
 //@desc home page for uploading gallery photos
 //@route POST /galleryPhotoUpload
-//@access public
+//@access private
 
 const galleryPhotoUploadPost = async (req, res) => {
 	console.log(req.body);
@@ -43,7 +43,8 @@ const galleryPhotoUploadPost = async (req, res) => {
 		await sharp(req.file.destination + fileName).resize(100, 100).jpeg({quality: 90}).toFile(process.env.UPLOAD_THUMBNAIL_PATH + fileName);
 
 		let sqlReq = 'INSERT into galleryphotos (filename, origname, alttext, privacy, userid) VALUES (?,?,?,?,?)';
-		const userId = 1;//see on ajutine, kuni päris kasutajakontod teeme
+		//const userId = 1;//see on ajutine, kuni päris kasutajakontod teeme
+		const userid = req.session.userId;
 		// loon andmebaasiühenduse
         conn = await mysql.createConnection({
             host: process.env.DB_HOST,
