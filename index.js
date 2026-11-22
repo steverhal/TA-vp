@@ -1,10 +1,8 @@
+
 const express = require('express');
 const fs = require('fs').promises;
-//moodul URL-i lahtiharutamiseks, et saaks POST osad ka kätte
 const bodyparser = require('body-parser');
-//moodul andmebaasiga suhtlemiseks, promises osaga async programmeerimise jaoks
 const mysql = require('mysql2/promise');
-//moodul .env faili lugemiseks, keskkonnamuutujate parsimiseks
 require('dotenv').config();
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
@@ -15,39 +13,38 @@ const dateET = require('./src/dateTimeET');
 const textRef = 'public/txt/vanasonad.txt';
 const regTextRef = 'public/txt/visits.txt';
 
-//käivitan express.js funktsiooni ja annan nimeks "app"
 const app = express();
-//võtan kasutusele sessiooni
-/* app.use(session({
-	secret: process.env.SES_SECRET,
-	saveUninitialized: false,
-	resave: false
-})); */
+
+// Sessioon
 const sessionStore = new MySQLStore({
-	host: process.env.DB_HOST,
-	user: process.env.DB_USER,
-	password: process.env.DB_PASS,
-	database: process.env.DB_NAME
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
 });
+
 app.use(session({
-	secret: process.env.SES_SECRET,
-	store: sessionStore,
-	saveUninitialized: false,
-	resave: false,
-	cookie: {
-		maxAge: 1000 * 60 * 60 * 1 //sessiooni küpsiste aegumisaeg
-	}	
+    secret: process.env.SES_SECRET,
+    store: sessionStore,
+    saveUninitialized: false,
+    resave: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60
+    }
 }));
 
-//määrame veebilehtedele mallide renderdamise mootori
 app.set('view engine', 'ejs');
-//määran ühe päris kataloogi virtuaalses serveris kättesaadavaks
 app.use(express.static('public'));
-app.use(bodyparser.urlencoded({extended: true}));//kui vormidest ainult tekst, siis "false"
+app.use(bodyparser.urlencoded({extended: true}));
 
-// marsruudid
+// Sisseloginud kasutaja nimi kõigile lehtedele
+app.use((req, res, next) => {
+    res.locals.userName = req.session.userName || null;
+    next();
+});
+
+// Avaleht
 app.get('/', async (req, res) => {
-    //res.send("Express.js läks kaima ja serveerib meile veebi.");
     const dayNow = dateET.day();
     const dateNow = dateET.fullDate(0);
     const timeNow = dateET.fullTime();
@@ -85,17 +82,24 @@ app.get('/', async (req, res) => {
     });
 });
 
-//sisseloginud kasutajate avaleht
+// Sisseloginud kasutaja avaleht
 app.get('/home', checkLogin.isLogin, (req, res) => {
-	res.render("home");
+    res.render("home");
 });
 
-//väljalogimine
+// Väljalogimine
 app.get('/logout', (req, res) => {
-	res.redirect("/");
+    req.session.destroy((err) => {
+        if (err) {
+            console.log(err);
+            return res.redirect("/home");
+        }
+        res.clearCookie("connect.sid");
+        res.redirect("/");
+    });
 });
 
-// Vanasõna
+// Vanasõnad
 app.get('/vanasonad', async (req, res) => {
     try {
         const data = await fs.readFile(textRef, 'utf8');
@@ -111,7 +115,6 @@ app.get('/vanasonad', async (req, res) => {
     }
 });
 
-// Õpetaja repo vana marsruut jääb samuti tööle
 app.get('/vanasona', async (req, res) => {
     try {
         const data = await fs.readFile(textRef, 'utf8');
@@ -127,42 +130,43 @@ app.get('/vanasona', async (req, res) => {
     }
 });
 
-// Natuke Tallinna Ülikoolist
 app.get('/miksTLU', (req, res) => {
     res.render('miksTLU');
 });
 
-// Õpetaja repo vana marsruut
 app.get('/tlu', (req, res) => {
     res.render('miksTLU');
 });
 
-// Minustss
 app.get('/minust', (req, res) => {
     res.render('minust');
 });
 
-//Külastuse registreerimise marsruudid
+// Külastuse registreerimine
 const regvisitRouter = require("./routes/regvisitRoutes");
 app.use("/regvisit", regvisitRouter);
 
-//Eesti filmi marsruudid
+// Eesti film
 const eestifilmRouter = require("./routes/eestifilmRoutes");
 app.use("/eestifilm", eestifilmRouter);
 
-//galeriipiltide üleslaadimine
+// Fotode üleslaadimine
 const galleryPhotoUploadRouter = require("./routes/galleryPhotoUploadRoutes");
 app.use("/galleryPhotoUpload", galleryPhotoUploadRouter);
 
-//fotogalerii
+// Fotogalerii
 const galleryRouter = require("./routes/galleryRoutes");
 app.use("/gallery", galleryRouter);
 
-//kasutajakonto loomise marsruut
+// Minu galerii
+const myGalleryRouter = require("./routes/myGalleryRoutes");
+app.use("/myGallery", myGalleryRouter);
+
+// Registreerimine
 const signupRouter = require('./routes/signupRoutes');
 app.use('/signup', signupRouter);
 
-//sisselogimise marsruut
+// Sisselogimine
 const signinRouter = require('./routes/signinRoutes');
 app.use('/signin', signinRouter);
 

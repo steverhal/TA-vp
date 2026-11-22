@@ -3,39 +3,71 @@
 <head>
     <meta charset="utf-8">
     <title>Fotogalerii</title>
-	<link rel="stylesheet" href="/style/gallery.css">
-	<script src="/script/gallery.js" defer></script>
+    <link rel="stylesheet" href="/style/gallery.css">
+    <script src="/script/gallery.js" defer></script>
 </head>
 <body>
     <img src="/pic/veebiprogrammeerimine_2026_TA.png" alt="Veebiprogrammeerimine">
+
     <h1>Fotogalerii</h1>
+    <p>Sisse loginud: <%= userName %></p>
+
     <hr>
     <ul>
         <li><a href="/home">Tagasi avalehele</a></li>
-		<li><a href="/logout">Logi välja</a></li>
+        <li><a href="/logout">Logi välja</a></li>
         <li><a href="/galleryPhotoUpload">Lae foto üles</a></li>
+        <li><a href="/myGallery">Minu galerii</a></li>
     </ul>
     <hr>
-	<dialog id="modal" class="modalarea">
-		<span id="modalClose" class="modalclose">&times;</span>
-		<div class="modalhorizontal">
-			<div class="modalvertical">
-				<p id="modalCaption"></p>
-				<img id="modalImage" src="../pic/empty.png" alt="galeriipilt">
-				</div>
-			</div>
-	</dialog>
 
-	<div id="gallery" class="gallery">
-    <%if (photos.length > 0) {%>
-        <%photos.forEach(photo => {%>
-            <img src="/gallery/thumbs/<%=photo.filename%>"
-                 alt="<%= photo.alttext || 'Galerii foto' %>"
-				 class="thumbs" data-id="<%=photo.id%>" data-filename="<%=photo.filename%>">
-        <% }); %>
-    <% } else { %>
-        <p>Galeriis pole veel fotosid.</p>
-    <% } %>
-	</div>
+    <dialog id="modal" class="modalarea">
+        <span id="modalClose" class="modalclose">&times;</span>
+        <div class="modalhorizontal">
+            <div class="modalvertical">
+                <p id="modalCaption"></p>
+                <img id="modalImage"
+                     src="/pic/empty.png"
+                     alt="Galeriipilt">
+            </div>
+        </div>
+    </dialog>
+
+    <div id="gallery" class="gallery"
+         style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+        <% if (photos.length > 0) { %>
+
+            <% photos.forEach(photo => { %>
+
+                <div style="width: 120px; text-align: center;">
+
+                    <img
+                        src="/gallery/thumbs/<%= photo.filename %>"
+                        alt="<%= photo.alttext || 'Galerii foto' %>"
+                        class="thumbs"
+                        data-id="<%= photo.id %>"
+                        data-filename="<%= photo.filename %>">
+
+                    <p>
+                        Privaatsus:
+                        <% if (photo.privacy == 2) { %>
+                            Sisseloginud kasutajatele
+                        <% } else { %>
+                            Avalik
+                        <% } %>
+                    </p>
+
+                </div>
+
+            <% }); %>
+
+        <% } else { %>
+
+            <p>Galeriis pole veel fotosid.</p>
+
+        <% } %>
+
+    </div>
 </body>
 </html>
