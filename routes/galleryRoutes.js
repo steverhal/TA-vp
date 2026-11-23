@@ -5,9 +5,11 @@ const router = express.Router();
 router.use(checkLogin.isLogin);
 
 const {
-    gallery
+    galleryHome,
+    galleryPage
 } = require("../controllers/galleryControllers");
 
-router.route("/").get(gallery);
+router.get("/", galleryHome);
+router.get("/:page", galleryPage);
 
 module.exports = router;

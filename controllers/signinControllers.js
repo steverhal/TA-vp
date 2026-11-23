@@ -1,12 +1,18 @@
 const mysql = require('mysql2/promise');
 const argon = require('argon2');
 
-// Sisselogimise leht
+//@desc page for logging in
+//@route GET /signin
+//@access public
+
 const signinPage = (req, res) => {
     res.render('signin', {notice: 'Ootan konto andmeid!'});
 };
 
-// Sisselogimine
+//@desc page for logging in
+//@route POST /signin
+//@access public
+
 const signinPagePost = async (req, res) => {
     let conn;
     let notice = '';

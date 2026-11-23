@@ -2,12 +2,18 @@ const mysql = require("mysql2/promise");
 const fs = require("fs").promises;
 const sharp = require("sharp");
 
-// Fotode üleslaadimise leht
+//@desc home page for uploading gallery photos
+//@route GET /galleryPhotoUpload
+//@access private
+
 const galleryPhotoUpload = (req, res) => {
     res.render("galleryPhotoUpload");
 };
 
-// Foto üleslaadimine
+//@desc home page for uploading gallery photos
+//@route POST /galleryPhotoUpload
+//@access private
+
 const galleryPhotoUploadPost = async (req, res) => {
     console.log(req.body);
     console.log(req.file);
